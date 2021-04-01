@@ -1,7 +1,4 @@
 ---
 - hosts: all
-  tasks:
-    - name: configure hostname and domain-name
-      cisco.nxos.nxos_system:
-        hostname: "{{ inventory_hostname }}"
-        domain_name: test-12.example.com
+  roles:
+    - vpc

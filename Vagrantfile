@@ -35,6 +35,9 @@ Vagrant.configure("2") do |config|
         v.memory = 8192
         v.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]
         v.customize ["modifyvm", :id, "--uartmode1", "tcpserver", "2301"]
+        v.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+        v.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+        v.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
   
       end
     end
@@ -49,7 +52,10 @@ Vagrant.configure("2") do |config|
         v.name = "nxos-02"
         v.memory = 8192
         v.customize ["modifyvm", :id, "--uart1", "0x3f8", "4"]
-        v.customize ["modifyvm", :id, "--uartmode1", "tcpserver", "2302"] 
+        v.customize ["modifyvm", :id, "--uartmode1", "tcpserver", "2302"]
+        v.customize ["modifyvm" ,:id, "--nicpromisc2", "allow-all"]
+        v.customize ["modifyvm" ,:id, "--nicpromisc3", "allow-all"]
+        v.customize ["modifyvm" ,:id, "--nicpromisc4", "allow-all"]
         if Vagrant.has_plugin?("vagrant-vbguest")
           config.vbguest.auto_update = false
         end

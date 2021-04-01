@@ -1,0 +1,15 @@
+vlans:
+  - { vlan_id: 10, name: peer_keepalive }
+  - { vlan_id: 20, name: test_segment }
+  - { vlan_id: 99, name: native }
+
+
+vpc:
+  dummy:
+    domain: 100
+    system_priority: 2000
+    role_priority: 2000
+    pkl:
+      src: 10.1.20.3
+      dest: 10.1.20.2
+      vrf: keepalive

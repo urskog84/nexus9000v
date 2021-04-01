@@ -1,0 +1,132 @@
+---
+- name: configure hostname and domain
+  cisco.nxos.nxos_system:
+    hostname: "{{ inventory_hostname }}"
+    domain_name: test-12.example.com
+
+- name: Ensure featur is enabled
+  cisco.nxos.nxos_feature:
+    feature: "{{ item }}"
+    state: enabled
+  with_items:
+    - lacp
+    - vpc
+    - interface-vlan
+
+- name: ensure names exist for important vlans
+  cisco.nxos.nxos_vlans: 
+    config: "{{ vlans }}"
+
+
+
+
+#############################################################
+# Global VPC Configuration
+#############################################################
+
+
+- name: create vrf keepalive
+  cisco.nxos.nxos_vrf:
+    name: keepalive
+    description: VPC Keepalive 
+    state: present
+
+- name: global vpc configuration params
+  cisco.nxos.nxos_vpc:
+    domain: 100
+    role_priority: 28672
+    system_priority: 2000
+    delay_restore: 180
+    pkl_src: "{{ peer_keepalive_ip | ipaddr('address') }}"
+    pkl_dest: "{{ peer_keepalive_dst | ipaddr('address') }}"
+    pkl_vrf: keepalive 
+    peer_gw: true
+    auto_recovery: true
+
+
+#############################################################
+# VPC Keelalive link
+#############################################################
+
+
+
+- name: vpc ip interface
+  cisco.nxos.nxos_l3_interfaces:
+    config:
+    - name: vlan10
+      ipv4:
+      - address: "{{ peer_keepalive_ip }}"
+    state: merged
+
+
+- name: Assagning vrf to vlan 10
+  cisco.nxos.nxos_vrf_interface:
+    vrf: keepalive
+    interface: vlan10
+    state: present
+
+
+- name: enabled vpc ip interface 
+  cisco.nxos.nxos_config:
+    lines:
+      - "mac-address {{ mac_address }}"
+      - no shutdown
+    before: interface vlan10
+
+- name: L2 config for peer keepalive link
+  cisco.nxos.nxos_l2_interfaces:
+    config:
+    - name: Ethernet1/3
+      mode: trunk
+      trunk:
+        allowed_vlans: 10
+
+
+#############################################################
+# Peer Link
+#############################################################
+
+- name: Port Channels
+  cisco.nxos.nxos_interfaces:
+    config:
+    - name: port-channel 10
+      enabled: true
+   
+- name: Add port-channel interfaces
+  cisco.nxos.lag_interfaces:
+    config:
+    - name: port-channel 10
+      members:
+      - member: Ethernet1/1
+        force: true
+      - member: Ethernet1/2
+        force: true
+    state: merged
+
+- name: L2 config for peer keepalive link
+  cisco.nxos.nxos_l2_interfaces:
+    config:
+    - name: port-channel 10
+      mode: trunk
+      trunk:
+        allowed_vlans: 10
+
+
+- name: Set port-channel 10 as VPC peer link
+  cisco.nxos.nxos_vpc_interface:
+    portchannel: 10
+    peer_link: true 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

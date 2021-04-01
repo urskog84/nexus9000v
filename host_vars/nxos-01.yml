@@ -1,0 +1,4 @@
+peer_keepalive_ip: 1.1.1.1/24
+peer_keepalive_dst: 1.1.1.2/24
+
+mac_address: 086c.eeaa.1b08
